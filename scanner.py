@@ -16,8 +16,11 @@ MODE = 'Gray'
 #What's DPI again?
 DPI = '300'
 
-# US Letter
-SCAN_COORDS = ('215.9', '279.4')
+# Various Document Sizes
+SCAN_COORDS = {
+    'US_Letter': ('215.9', '279.4')
+    
+    }
 
 #Where all the scans go.
 OUTPUT_DIR = './scans'
@@ -48,8 +51,8 @@ def scan():
         f'--device-name={SANE_SCAN_ID}',
         f'--format={FORMAT}', f'--mode={MODE}',
         f'--resolution={DPI}',
-        '-x', SCAN_COORDS[0],
-        '-y', SCAN_COORDS[1],
+        '-x', SCAN_COORDS['US_Letter'][0],
+        '-y', SCAN_COORDS['US_Letter'][1],
         f'--output-file={OUTPUT_DIR}/{filename()}.png'
         ]
         )
