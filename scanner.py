@@ -32,19 +32,29 @@ def init():
         Path(OUTPUT_DIR).mkdir()
     
 
-def filename():
+def filename(name, num, batch=False):
     # Pass argument as filename or timestamp if there is none.
-    if len(sys.argv) > 1:
+    if batch:
+        if name:
 
-        output_filename = str(sys.argv[1])
+            output_filename = str(name + f'_{num:03}')
+
+        else:
+    
+            output_filename = datetime.now().strftime(f"%Y-%m-%d_%H-%M-%S_{num:03}")
 
     else:
- 
-        output_filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        if name:
+
+            output_filename = name
+
+        else:
+    
+            output_filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     
     return output_filename
 
-def scan():
+def scan(file):
 
     subprocess.run([
         'scanimage',
@@ -53,10 +63,61 @@ def scan():
         f'--resolution={DPI}',
         '-x', SCAN_COORDS['US_Letter'][0],
         '-y', SCAN_COORDS['US_Letter'][1],
-        f'--output-file={OUTPUT_DIR}/{filename()}.png'
+        f'--output-file={OUTPUT_DIR}/{file}.png'
         ]
         )
 
-if __name__ == "__main__":
+        
+def main():
+
     init()
-    scan()
+
+    while True:
+        scan_num = 0
+        batch = None
+
+        job_type = input('s for single | b for batch | e to exit > ')
+        if job_type in ('e', 'E', 'exit', 'quit'):
+            exit(0)
+
+        elif job_type in ('b', 'B', 'batch'):
+            batch = True
+        
+        elif job_type in ('s', 'S', 'single'):
+            batch = False
+        
+        else:
+            print(f'Invalid selection: {job_type}')
+            continue
+
+        # Determining filename
+        while True:
+            job_name = input('Enter job name or leave blank for timestamp. > ')
+
+            if any(char in ('\\', '/', ':', '?', '"', '<', '>', '|') for char in job_name) or len(job_name) >= 100:
+                print('Illegal characters in job name or maximum length exceeded.')
+                continue
+            else:
+                break
+
+        while True:
+            scan_prompt = input(f'Insert Document #{scan_num + 1}. (e to end job) > ')
+
+            if scan_prompt in ('e', 'E', 'exit', 'quit'):
+                print(f'Job Complete. Number of Documents Scanned: {scan_num}')
+                break
+
+            scan_num += 1
+
+            scan(filename(name=job_name, num=scan_num, batch=batch))
+
+            if not batch:
+                print('Job Complete.')
+                break
+
+    
+        
+
+
+if __name__ == "__main__":
+    main()
