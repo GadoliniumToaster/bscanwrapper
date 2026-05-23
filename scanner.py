@@ -32,7 +32,7 @@ def init():
         Path(OUTPUT_DIR).mkdir()
     
 
-def filename(name, num, batch=False):
+def filename(name=None, num=None, batch=False):
     # Pass argument as filename or timestamp if there is none.
     if batch:
         if name:
@@ -54,7 +54,7 @@ def filename(name, num, batch=False):
     
     return output_filename
 
-def scan(file):
+def scan(file, folder):
 
     subprocess.run([
         'scanimage',
@@ -63,7 +63,7 @@ def scan(file):
         f'--resolution={DPI}',
         '-x', SCAN_COORDS['US_Letter'][0],
         '-y', SCAN_COORDS['US_Letter'][1],
-        f'--output-file={OUTPUT_DIR}/{file}.png'
+        f'--output-file={OUTPUT_DIR}/{folder}/{file}.png'
         ]
         )
 
@@ -72,6 +72,7 @@ def main():
 
     init()
 
+    # Main Loop
     while True:
         scan_num = 0
         batch = None
@@ -94,12 +95,17 @@ def main():
         while True:
             job_name = input('Enter job name or leave blank for timestamp. > ')
 
+            # Preventing any no-no characters and long filenames.
             if any(char in ('\\', '/', ':', '?', '"', '<', '>', '|') for char in job_name) or len(job_name) >= 100:
                 print('Illegal characters in job name or maximum length exceeded.')
                 continue
             else:
+                #Creates Job folder if none exists.
+                if not Path(f'{OUTPUT_DIR}/{job_name}').is_dir():
+                    Path(f'{OUTPUT_DIR}/{job_name}').mkdir()
                 break
-
+        
+        # The Loop for the Job
         while True:
             scan_prompt = input(f'Insert Document #{scan_num + 1}. (e to end job) > ')
 
@@ -109,8 +115,9 @@ def main():
 
             scan_num += 1
 
-            scan(filename(name=job_name, num=scan_num, batch=batch))
+            scan(file=filename(name=job_name, num=scan_num, batch=batch), folder=job_name)
 
+            #Breaking loop if this is isn't a batch job
             if not batch:
                 print('Job Complete.')
                 break
