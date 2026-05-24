@@ -3,32 +3,33 @@ import subprocess
 import sys
 from pathlib import Path
 import time
+from typing import Final
 
 # ID for my Brother DS 720D
-SANE_SCAN_ID = 'dsseries:usb:0x04F9:0x60E0'
+SANE_SCAN_ID: Final[str] = 'dsseries:usb:0x04F9:0x60E0'
 
 # Can also do PDF, probably the only two options that will ever be used.
-FORMAT = 'png'
+FORMAT: Final[str] = 'png'
 
 #Linear | Color | Gray
-MODE = 'Gray'
+MODE: Final[str] = 'Gray'
 
 #What's DPI again?
-DPI = '300'
+DPI: Final[str] = '300'
 
 # Various Document Sizes
-SCAN_COORDS = {
+SCAN_COORDS: Final[dict[tuple]] = {
     'US_Letter': ('215.9', '279.4')
     
     }
 
 #Where all the scans go.
-OUTPUT_DIR = Path('./scans')
+OUTPUT_DIR: Final[Path] = Path('./scans')
     
 
-def filename(name=None, num=None, folder: Path=None, batch=False):
+def filename(name: str=None, num: int=None, folder: Path=None, batch: bool=False) -> Path:
     #Determine file extension/format
-    extension = f'.{FORMAT}'
+    extension: str = f'.{FORMAT}'
 
     # Pass argument as filename or timestamp if there is none.
     if batch:
@@ -51,28 +52,32 @@ def filename(name=None, num=None, folder: Path=None, batch=False):
     
     return folder / output_filename
 
-def scan(file):
+def scan(file: Path) -> None:
 
-    subprocess.run([
-        'scanimage',
-        f'--device-name={SANE_SCAN_ID}',
-        f'--format={FORMAT}', f'--mode={MODE}',
-        f'--resolution={DPI}',
-        '-x', SCAN_COORDS['US_Letter'][0],
-        '-y', SCAN_COORDS['US_Letter'][1],
-        f'--output-file={file}'
-        ]
-        )
+    try:
+        subprocess.run([
+            'scanimage',
+            f'--device-name={SANE_SCAN_ID}',
+            f'--format={FORMAT}', f'--mode={MODE}',
+            f'--resolution={DPI}',
+            '-x', SCAN_COORDS['US_Letter'][0],
+            '-y', SCAN_COORDS['US_Letter'][1],
+            f'--output-file={file}'
+            ],
+            check=True
+            )
+    except subprocess.CalledProcessError as e:
+        print(f'Scan failed with return code {e}.')
 
         
-def main():
+def main() -> None:
 
     # Main Loop
     while True:
-        scan_num = 0
-        batch = None
+        scan_num: int = 0
+        batch: bool = None
 
-        job_type = input('s for single | b for batch | e to exit > ')
+        job_type: str = input('s for single | b for batch | e to exit > ')
         if job_type in ('e', 'E', 'exit', 'quit'):
             exit(0)
 
@@ -88,7 +93,7 @@ def main():
 
         # Determining filename
         while True:
-            job_name = input('Enter job name or leave blank for timestamp. > ')
+            job_name: str = input('Enter job name or leave blank for timestamp. > ')
 
             # Preventing any no-no characters and long filenames.
             if any(char in ('\\', '/', ':', '?', '"', '<', '>', '|') for char in job_name) or len(job_name) >= 100:
@@ -100,13 +105,13 @@ def main():
                     job_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
                 #Creates Job folder if none exists.
-                job_folder = OUTPUT_DIR / job_name
+                job_folder: Path = OUTPUT_DIR / job_name
                 job_folder.mkdir(parents=True, exist_ok=True)
                 break
         
         # The Loop for the Job
         while True:
-            scan_prompt = input(f'Insert Document #{scan_num + 1}. (e to end job) > ')
+            scan_prompt: str = input(f'Insert Document #{scan_num + 1}. (e to end job) > ')
 
             if scan_prompt in ('e', 'E', 'exit', 'quit'):
                 print(f'Job Complete. Number of Documents Scanned: {scan_num}')
