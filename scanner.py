@@ -23,38 +23,35 @@ SCAN_COORDS = {
     }
 
 #Where all the scans go.
-OUTPUT_DIR = './scans'
-
-def init():
-    # Ensuring that the scans directory exists and creates it if not.
-    if not Path(OUTPUT_DIR).is_dir():
-
-        Path(OUTPUT_DIR).mkdir()
+OUTPUT_DIR = Path('./scans')
     
 
-def filename(name=None, num=None, batch=False):
+def filename(name=None, num=None, folder: Path=None, batch=False):
+    #Determine file extension/format
+    extension = f'.{FORMAT}'
+
     # Pass argument as filename or timestamp if there is none.
     if batch:
         if name:
 
-            output_filename = str(name + f'_{num:03}')
+            output_filename = str(name + f'_{num:03}{extension}')
 
         else:
     
-            output_filename = datetime.now().strftime(f"%Y-%m-%d_%H-%M-%S_{num:03}")
+            output_filename = datetime.now().strftime(f"%Y-%m-%d_%H-%M-%S_{num:03}{extension}")
 
     else:
         if name:
 
-            output_filename = name
+            output_filename = name + extension
 
         else:
     
-            output_filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            output_filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + extension
     
-    return output_filename
+    return folder / output_filename
 
-def scan(file, folder):
+def scan(file):
 
     subprocess.run([
         'scanimage',
@@ -63,14 +60,12 @@ def scan(file, folder):
         f'--resolution={DPI}',
         '-x', SCAN_COORDS['US_Letter'][0],
         '-y', SCAN_COORDS['US_Letter'][1],
-        f'--output-file={OUTPUT_DIR}/{folder}/{file}.png'
+        f'--output-file={file}'
         ]
         )
 
         
 def main():
-
-    init()
 
     # Main Loop
     while True:
@@ -100,9 +95,13 @@ def main():
                 print('Illegal characters in job name or maximum length exceeded.')
                 continue
             else:
+
+                if not job_name:
+                    job_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
                 #Creates Job folder if none exists.
-                if not Path(f'{OUTPUT_DIR}/{job_name}').is_dir():
-                    Path(f'{OUTPUT_DIR}/{job_name}').mkdir()
+                job_folder = OUTPUT_DIR / job_name
+                job_folder.mkdir(parents=True, exist_ok=True)
                 break
         
         # The Loop for the Job
@@ -114,8 +113,9 @@ def main():
                 break
 
             scan_num += 1
+            
 
-            scan(file=filename(name=job_name, num=scan_num, batch=batch), folder=job_name)
+            scan(file=filename(name=job_name, num=scan_num, folder=job_folder, batch=batch))
 
             #Breaking loop if this is isn't a batch job
             if not batch:
