@@ -1,9 +1,8 @@
 from datetime import datetime
 import subprocess
-import sys
 from pathlib import Path
-import time
 from typing import Final
+import sys
 
 # ID for my Brother DS 720D
 SANE_SCAN_ID: Final[str] = 'dsseries:usb:0x04F9:0x60E0'
@@ -19,13 +18,11 @@ DPI: Final[str] = '300'
 
 # Various Document Sizes
 SCAN_COORDS: Final[dict[tuple]] = {
-    'US_Letter': ('215.9', '279.4')
-    
+    'US_Letter': ('215.9', '279.4')   
     }
 
 #Where all the scans go.
-OUTPUT_DIR: Final[Path] = Path('./scans')
-    
+OUTPUT_DIR: Final[Path] = Path('./scans')   
 
 def filename(name: str=None, num: int=None, folder: Path=None, batch: bool=False) -> Path:
     #Determine file extension/format
@@ -38,7 +35,6 @@ def filename(name: str=None, num: int=None, folder: Path=None, batch: bool=False
             output_filename = str(name + f'_{num:03}{extension}')
 
         else:
-    
             output_filename = datetime.now().strftime(f"%Y-%m-%d_%H-%M-%S_{num:03}{extension}")
 
     else:
@@ -69,7 +65,6 @@ def scan(file: Path) -> None:
     except subprocess.CalledProcessError as e:
         print(f'Scan failed with return code {e}.')
 
-        
 def main() -> None:
 
     # Main Loop
@@ -79,14 +74,13 @@ def main() -> None:
 
         job_type: str = input('s for single | b for batch | e to exit > ')
         if job_type in ('e', 'E', 'exit', 'quit'):
-            exit(0)
+            sys.exit(0)
 
         elif job_type in ('b', 'B', 'batch'):
             batch = True
-        
         elif job_type in ('s', 'S', 'single'):
             batch = False
-        
+ 
         else:
             print(f'Invalid selection: {job_type}')
             continue
@@ -126,10 +120,6 @@ def main() -> None:
             if not batch:
                 print('Job Complete.')
                 break
-
-    
-        
-
 
 if __name__ == "__main__":
     main()
