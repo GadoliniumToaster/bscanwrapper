@@ -25,6 +25,7 @@ SCAN_COORDS: Final[dict[tuple]] = {
 OUTPUT_DIR: Final[Path] = Path('./scans')   
 
 def filename(name: str=None, num: int=None, folder: Path=None, batch: bool=False) -> Path:
+    """Finding out the name of the file and where it needs to go for a scan."""
     #Determine file extension/format
     extension: str = f'.{FORMAT}'
 
@@ -49,6 +50,7 @@ def filename(name: str=None, num: int=None, folder: Path=None, batch: bool=False
     return folder / output_filename
 
 def scan(file: Path) -> None:
+    """Scan subprocess using scanimage command"""
 
     try:
         subprocess.run([
@@ -66,6 +68,7 @@ def scan(file: Path) -> None:
         print(f'Scan failed with return code {e}.')
 
 def main() -> None:
+    """Main loop"""
 
     # Main Loop
     while True:
