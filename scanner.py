@@ -1,3 +1,4 @@
+"""scanimage wrapper"""
 from datetime import datetime
 import subprocess
 from pathlib import Path
@@ -22,7 +23,7 @@ SCAN_COORDS: Final[dict[tuple]] = {
     }
 
 #Where all the scans go.
-OUTPUT_DIR: Final[Path] = Path('./scans')   
+OUTPUT_DIR: Final[Path] = Path('./scans')
 
 def filename(name: str=None, num: int=None, folder: Path=None, batch: bool=False) -> Path:
     """Finding out the name of the file and where it needs to go for a scan."""
@@ -44,9 +45,9 @@ def filename(name: str=None, num: int=None, folder: Path=None, batch: bool=False
             output_filename = name + extension
 
         else:
-    
+
             output_filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + extension
-    
+
     return folder / output_filename
 
 def scan(file: Path) -> None:
@@ -83,7 +84,7 @@ def main() -> None:
             batch = True
         elif job_type in ('s', 'S', 'single'):
             batch = False
- 
+
         else:
             print(f'Invalid selection: {job_type}')
             continue
@@ -92,8 +93,9 @@ def main() -> None:
         while True:
             job_name: str = input('Enter job name or leave blank for timestamp. > ')
 
+            BAD_CHAR: Final[tuple[str]] = ('\\', '/', ':', '?', '"', '<', '>', '|')
             # Preventing any no-no characters and long filenames.
-            if any(char in ('\\', '/', ':', '?', '"', '<', '>', '|') for char in job_name) or len(job_name) >= 100:
+            if any(char in BAD_CHAR for char in job_name) or len(job_name) >= 100:
                 print('Illegal characters in job name or maximum length exceeded.')
                 continue
 
@@ -104,7 +106,7 @@ def main() -> None:
                 job_folder: Path = OUTPUT_DIR / job_name
                 job_folder.mkdir(parents=True, exist_ok=True)
                 break
-        
+
         # The Loop for the Job
         while True:
             scan_prompt: str = input(f'Insert Document #{scan_num + 1}. (e to end job) > ')
@@ -114,7 +116,7 @@ def main() -> None:
                 break
 
             scan_num += 1
-            
+
 
             scan(file=filename(name=job_name, num=scan_num, folder=job_folder, batch=batch))
 
