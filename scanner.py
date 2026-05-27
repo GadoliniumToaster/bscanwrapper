@@ -96,10 +96,9 @@ def main() -> None:
             if any(char in ('\\', '/', ':', '?', '"', '<', '>', '|') for char in job_name) or len(job_name) >= 100:
                 print('Illegal characters in job name or maximum length exceeded.')
                 continue
-            else:
 
-                if not job_name:
-                    job_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            if not job_name:
+                job_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
                 #Creates Job folder if none exists.
                 job_folder: Path = OUTPUT_DIR / job_name
