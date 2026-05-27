@@ -27,7 +27,7 @@ OUTPUT_DIR: Final[Path] = Path('./scans')
 
 BAD_CHAR: Final[tuple[str]] = ('\\', '/', ':', '?', '"', '<', '>', '|')
 
-def filename(name: str=None, num: int=None, folder: Path=None, batch: bool=False) -> Path:
+def filename(name: str=None, num: int=0, batch: bool=False) -> Path:
     """Finding out the name of the file and where it needs to go for a scan."""
     #Determine file extension/format
     extension: str = f'.{FORMAT}'
@@ -50,9 +50,9 @@ def filename(name: str=None, num: int=None, folder: Path=None, batch: bool=False
 
             output_filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + extension
 
-    return folder / output_filename
+    return output_filename
 
-def scan(file: Path) -> None:
+def scan(file: Path, folder: Path) -> None:
     """Scan subprocess using scanimage command"""
 
     try:
@@ -63,7 +63,7 @@ def scan(file: Path) -> None:
             f'--resolution={DPI}',
             '-x', SCAN_COORDS['US_Letter'][0],
             '-y', SCAN_COORDS['US_Letter'][1],
-            f'--output-file={file}'
+            f'--output-file={folder / file}'
             ],
             check=True
             )
@@ -120,7 +120,7 @@ def main() -> None:
             scan_num += 1
 
 
-            scan(file=filename(name=job_name, num=scan_num, folder=job_folder, batch=batch))
+            scan(file=filename(name=job_name, num=scan_num, batch=batch), folder=job_folder)
 
             #Breaking loop if this is isn't a batch job
             if not batch:
