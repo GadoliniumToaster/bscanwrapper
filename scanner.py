@@ -25,6 +25,8 @@ SCAN_COORDS: Final[dict[tuple]] = {
 #Where all the scans go.
 OUTPUT_DIR: Final[Path] = Path('./scans')
 
+BAD_CHAR: Final[tuple[str]] = ('\\', '/', ':', '?', '"', '<', '>', '|')
+
 def filename(name: str=None, num: int=None, folder: Path=None, batch: bool=False) -> Path:
     """Finding out the name of the file and where it needs to go for a scan."""
     #Determine file extension/format
@@ -93,7 +95,7 @@ def main() -> None:
         while True:
             job_name: str = input('Enter job name or leave blank for timestamp. > ')
 
-            BAD_CHAR: Final[tuple[str]] = ('\\', '/', ':', '?', '"', '<', '>', '|')
+
             # Preventing any no-no characters and long filenames.
             if any(char in BAD_CHAR for char in job_name) or len(job_name) >= 100:
                 print('Illegal characters in job name or maximum length exceeded.')
